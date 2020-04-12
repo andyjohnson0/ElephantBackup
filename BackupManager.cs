@@ -31,7 +31,10 @@ namespace ElephantBackup
             {
                 foreach (var source in config.BackupSource)
                 {
-                    DoBackup(source.Path, config.BackupTarget.Path, ref bytesCopied, ref filesCopied, ref directoriesCopied);
+                    var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
+                                                     config.BackupTarget.Path);
+                    DoBackup(source.Path, targetPath,
+                             ref bytesCopied, ref filesCopied, ref directoriesCopied);
                 }
                 result.Success = true;
             }
@@ -98,6 +101,24 @@ namespace ElephantBackup
         {
             return Directory.GetDirectories(path)
                             .Where(dir => !exclude.Any(x => dir.IndexOf(x, StringComparison.OrdinalIgnoreCase) != -1));
+        }
+
+
+        private static string BuildTargetPath(
+            string sourceDirName, 
+            string targetParentDirPath)
+        {
+            for(var i = 0; i < 100000; i++)
+            {
+                var path = Path.Combine(targetParentDirPath,
+                                        "backup",
+                                        sourceDirName,
+                                        (i == 0) ? string.Empty : i.ToString());
+                if (!Directory.Exists(path))
+                    return path;
+            }
+
+            throw new Exception("Too many source root directories with same name: " + sourceDirName);
         }
 
     }
