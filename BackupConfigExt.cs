@@ -29,7 +29,10 @@ namespace ElephantBackup
                         Path = string.Empty
                     }
                 },
-                GlobalExclude = string.Empty
+                Options = new Options()
+                {
+                    GlobalExclude = string.Empty
+                }
             };
             return doc;
         }

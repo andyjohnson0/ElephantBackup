@@ -28,7 +28,7 @@ namespace ElephantBackup {
         
         private BackupSource[] backupSourceField;
         
-        private string globalExcludeField;
+        private Options optionsField;
         
         /// <remarks/>
         public BackupTarget BackupTarget {
@@ -52,12 +52,12 @@ namespace ElephantBackup {
         }
         
         /// <remarks/>
-        public string GlobalExclude {
+        public Options Options {
             get {
-                return this.globalExcludeField;
+                return this.optionsField;
             }
             set {
-                this.globalExcludeField = value;
+                this.optionsField = value;
             }
         }
     }
@@ -125,6 +125,27 @@ namespace ElephantBackup {
             }
             set {
                 this.pathField = value;
+            }
+        }
+    }
+    
+    /// <remarks/>
+    [System.CodeDom.Compiler.GeneratedCodeAttribute("xsd", "4.7.3081.0")]
+    [System.SerializableAttribute()]
+    [System.Diagnostics.DebuggerStepThroughAttribute()]
+    [System.ComponentModel.DesignerCategoryAttribute("code")]
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true)]
+    public partial class Options {
+        
+        private string globalExcludeField;
+        
+        /// <remarks/>
+        public string GlobalExclude {
+            get {
+                return this.globalExcludeField;
+            }
+            set {
+                this.globalExcludeField = value;
             }
         }
     }

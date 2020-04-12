@@ -9,7 +9,7 @@
       <xs:sequence>
         <xs:element ref="BackupTarget" minOccurs="0"/>
         <xs:element ref="BackupSource" minOccurs="0" maxOccurs="unbounded"/>
-        <xs:element name="GlobalExclude" type="xs:string" minOccurs="0"/> 
+        <xs:element ref="Options" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>   
   </xs:element>
@@ -27,11 +27,16 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Path" type="xs:string"/>
-
       </xs:sequence>
     </xs:complexType>
   </xs:element>
-  
-  
+
+  <xs:element name="Options">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="GlobalExclude" type="xs:string" minOccurs="0"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 
 </xs:schema>
