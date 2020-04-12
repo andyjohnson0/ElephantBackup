@@ -19,8 +19,7 @@ namespace ElephantBackup
                 BackupTarget = new BackupTarget()
                 {
                     Path = string.Empty,
-                    Verify = false,
-                    VerifySpecified = true
+                    Verify = false
                 },
                 BackupSource = new BackupSource[]
                 {

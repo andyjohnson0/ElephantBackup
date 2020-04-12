@@ -25,6 +25,8 @@ namespace ElephantBackup
 
         public long DirectoriesCopied { get; set; }
 
+        public string LogFilePath { get; set; }
+
         public Exception Exception { get; set; }
     }
 }

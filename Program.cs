@@ -69,6 +69,8 @@ namespace ElephantBackup
             Console.WriteLine("{0} bytes copied", result.BytesCopied);
             Console.WriteLine("{0} files copied", result.FilesCopied);
             Console.WriteLine("{0} directories copied", result.DirectoriesCopied);
+            if (result.LogFilePath != null)
+                Console.WriteLine("Log file created at {0}", result.LogFilePath);
 
             return result.Success;
         }

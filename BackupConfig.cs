@@ -74,7 +74,9 @@ namespace ElephantBackup {
         
         private bool verifyField;
         
-        private bool verifyFieldSpecified;
+        public BackupTarget() {
+            this.verifyField = false;
+        }
         
         /// <remarks/>
         public string Path {
@@ -87,23 +89,13 @@ namespace ElephantBackup {
         }
         
         /// <remarks/>
+        [System.ComponentModel.DefaultValueAttribute(false)]
         public bool Verify {
             get {
                 return this.verifyField;
             }
             set {
                 this.verifyField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.Xml.Serialization.XmlIgnoreAttribute()]
-        public bool VerifySpecified {
-            get {
-                return this.verifyFieldSpecified;
-            }
-            set {
-                this.verifyFieldSpecified = value;
             }
         }
     }
@@ -137,7 +129,24 @@ namespace ElephantBackup {
     [System.Xml.Serialization.XmlTypeAttribute(AnonymousType=true)]
     public partial class Options {
         
+        private bool createLogFileField;
+        
         private string globalExcludeField;
+        
+        public Options() {
+            this.createLogFileField = true;
+        }
+        
+        /// <remarks/>
+        [System.ComponentModel.DefaultValueAttribute(true)]
+        public bool CreateLogFile {
+            get {
+                return this.createLogFileField;
+            }
+            set {
+                this.createLogFileField = value;
+            }
+        }
         
         /// <remarks/>
         public string GlobalExclude {
