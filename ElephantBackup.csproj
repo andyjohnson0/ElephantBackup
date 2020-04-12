@@ -65,6 +65,7 @@
     <Compile Include="BackupException.cs" />
     <Compile Include="BackupManager.cs" />
     <Compile Include="BackupResult.cs" />
+    <Compile Include="CommandLineParser.cs" />
     <Compile Include="IBackupCallbacks.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

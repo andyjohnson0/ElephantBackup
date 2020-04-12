@@ -14,9 +14,8 @@ namespace ElephantBackup
     {
         static int Main(string[] args)
         {
-            return new Program().DoBackup(args);
+            return new Program().DoMain(args) ? 0 : 1;
         }
-
 
 
 
@@ -25,7 +24,36 @@ namespace ElephantBackup
         static extern uint GetConsoleProcessList(uint[] ProcessList, uint ProcessCount);
 
 
-        private int DoBackup(string[] args)
+        private bool DoMain(string[] args)
+        { 
+            var success = true;
+            var cli = new CommandLineParser(args);
+
+            if (cli.GetArg(new string[] { "?", "help" }))
+            {
+                DoHelp();
+            }
+            else if (cli.GetArg("createconfig"))
+            {
+                DoCreateConfig();
+            }
+            else
+            {
+                success = DoBackup();
+            }
+
+
+            if (GetConsoleProcessList(new uint[1], 1) == 1)
+            {
+                Console.WriteLine("[Press Enter to finish]");
+                Console.ReadLine();
+            }
+
+            return success;
+        }
+
+
+        private bool DoBackup()
         {
             var config = BackupConfig.Load();
             var bm = new BackupManager(config, this);
@@ -42,13 +70,7 @@ namespace ElephantBackup
             Console.WriteLine("{0} files copied", result.FilesCopied);
             Console.WriteLine("{0} directories copied", result.DirectoriesCopied);
 
-            if (GetConsoleProcessList(new uint[1], 1) == 1)
-            {
-                Console.WriteLine("[Press Enter to finish]");
-                Console.ReadLine();
-            }
-
-            return result.Success ? 0 : 1;
+            return result.Success;
         }
 
 
@@ -61,5 +83,42 @@ namespace ElephantBackup
         }
 
         #endregion IBackupCallbacks
+
+
+
+        private void DoHelp()
+        {
+            Console.WriteLine("ElephantBackup by Andy Johnson - andy@andyjohnson.uk");
+            Console.WriteLine();
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  eb [/? | /help]");
+            Console.WriteLine("    - Display this usage information");
+            Console.WriteLine("  eb /createconfig");
+            Console.WriteLine("    - Create a blank config file in the user's home directory");
+            Console.WriteLine("  eb");
+            Console.WriteLine("    - Perform a backup");
+            Console.WriteLine();
+        }
+
+
+        private void DoCreateConfig()
+        {
+            string configPath = BackupConfig.GetDefaultConfigFilePath();
+            if (File.Exists(configPath))
+            {
+                Console.WriteLine("{0} already exists. Overwrite (y/n)?", configPath);
+                if (Console.ReadLine() != "y")
+                    return;
+            }
+
+            using(var wtr = new StreamWriter(configPath, false))
+            {
+                var configStr = BackupConfig.CreateExample().ToString();
+                wtr.Write(configStr);
+            }
+            Console.WriteLine("Config file written to {0}", configPath);
+        }
+
+
     }
 }

@@ -12,6 +12,69 @@ namespace ElephantBackup
 {
     public partial class BackupConfig
     {
+        public static BackupConfig Create()
+        {
+            var doc = new BackupConfig()
+            {
+                BackupTarget = new BackupTarget()
+                {
+                    Path = string.Empty,
+                    Verify = false,
+                    VerifySpecified = true
+                },
+                BackupSource = new BackupSource[]
+                {
+                    new ElephantBackup.BackupSource()
+                    {
+                        Path = string.Empty
+                    }
+                },
+                GlobalExclude = string.Empty
+            };
+            return doc;
+        }
+
+
+        public static BackupConfig CreateExample()
+        {
+            var doc = BackupConfig.Create();
+            doc.BackupTarget.Path = "Path to root of back-up. " +
+                                    "Omit or leave blank to back-up to the first removable device.";
+            doc.BackupSource[0].Path = "Folder to back-up. Add more as needed.";
+            return doc;
+        }
+
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            var settings = new XmlWriterSettings
+            {
+                Indent = true,
+                IndentChars = "  ",
+                NewLineChars = "\r\n",
+                NewLineHandling = NewLineHandling.Replace
+            };
+            using (var wtr = XmlWriter.Create(sb, settings))
+            {
+                var ser = new XmlSerializer(typeof(BackupConfig));
+                ser.Serialize(wtr, this);
+            }
+            return sb.ToString();
+        }
+
+
+        public static string GetDefaultConfigFilePath()
+        {
+            return Path.Combine(
+                Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"),
+                "eb.config");
+        }
+
+
+
+
+        #region Loading
 
         private static DirectoryInfo[] defaultConfigDirs = new DirectoryInfo[]
         {
@@ -44,8 +107,6 @@ namespace ElephantBackup
 
         public static BackupConfig Load(DirectoryInfo di)
         {
-
-
             foreach(var filename in defaultConfigFilenames)
             {
                 var config = Load(new FileInfo(Path.Combine(di.FullName, filename)));
@@ -71,9 +132,6 @@ namespace ElephantBackup
                     config.BackupTarget.Path = BuildBackupTargetPath();
                 }
 
-
-
-
                 return config;
             }
         }
@@ -92,5 +150,7 @@ namespace ElephantBackup
 
             return null;
         }
+
+        #endregion Loading
     }
 }
