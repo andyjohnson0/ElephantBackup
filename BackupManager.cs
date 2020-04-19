@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Security.Cryptography;
 
 
-namespace ElephantBackup
+namespace uk.andyjohnson.ElephantBackup
 {
     public class BackupManager
     {
@@ -217,10 +216,9 @@ namespace ElephantBackup
         {
             for(var i = 0; i < 100000; i++)
             {
-                var path = Path.Combine(targetParentDirPath,
-                                        "backup",
-                                        sourceDirName,
-                                        (i == 0) ? string.Empty : i.ToString());
+                var path = Path.Combine(targetParentDirPath, "backup");
+                path = Path.Combine(path, sourceDirName);
+                path = Path.Combine(path, (i == 0) ? string.Empty : i.ToString());
                 if (!Directory.Exists(path))
                     return path;
             }

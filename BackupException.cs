@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace ElephantBackup
+namespace uk.andyjohnson.ElephantBackup
 {
     public class BackupException : Exception
     {

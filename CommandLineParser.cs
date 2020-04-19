@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace ElephantBackup
+namespace uk.andyjohnson.ElephantBackup
 {
     public class CommandLineParser
     {
