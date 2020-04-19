@@ -18,8 +18,7 @@ namespace ElephantBackup
             {
                 BackupTarget = new BackupTarget()
                 {
-                    Path = string.Empty,
-                    Verify = false
+                    Path = string.Empty
                 },
                 BackupSource = new BackupSource[]
                 {
@@ -30,7 +29,8 @@ namespace ElephantBackup
                 },
                 Options = new Options()
                 {
-                    GlobalExclude = string.Empty
+                    GlobalExclude = string.Empty,
+                    Verify = false
                 }
             };
             return doc;
@@ -66,11 +66,19 @@ namespace ElephantBackup
         }
 
 
-        public static string GetDefaultConfigFilePath()
+        public static string GetConfigPath()
         {
-            return Path.Combine(
-                Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"),
-                "eb.config");
+            foreach(var dir in defaultConfigDirs)
+            {
+                foreach(var name in defaultConfigFilenames)
+                {
+                    var path = Path.Combine(dir.ToString(), name);
+                    if (File.Exists(path))
+                        return path;
+                }
+            }
+
+            return Path.Combine(defaultConfigDirs[0].ToString(), defaultConfigFilenames[0]);
         }
 
 
@@ -83,9 +91,9 @@ namespace ElephantBackup
 #if DEBUG
             new DirectoryInfo("../../"),
 #endif
-            new DirectoryInfo(Environment.CurrentDirectory),
             new DirectoryInfo(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%")),
-            new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments))
+            new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
+            new DirectoryInfo(Environment.CurrentDirectory)
         };
 
 

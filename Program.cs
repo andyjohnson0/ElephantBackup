@@ -29,11 +29,11 @@ namespace ElephantBackup
             var success = true;
             var cli = new CommandLineParser(args);
 
-            if (cli.GetArg(new string[] { "?", "help" }))
+            if (cli.GetArg(new string[] { "help", "?" } ))
             {
                 DoHelp();
             }
-            else if (cli.GetArg("createconfig"))
+            else if (cli.GetArg(new string[] { "createconfig", "cc" } ))
             {
                 DoCreateConfig();
             }
@@ -56,6 +56,17 @@ namespace ElephantBackup
         private bool DoBackup()
         {
             var config = BackupConfig.Load();
+            if ((config?.BackupTarget == null) || (config.BackupTarget.Path == null))
+            {
+                Console.WriteLine("Error: No target specified");
+                return false;
+            }
+            if ((config?.BackupSource == null) || (config.BackupSource.Length == 0))
+            {
+                Console.WriteLine("Error: No sources specified");
+                return false;
+            }
+
             var bm = new BackupManager(config, this);
             var result = bm.DoBackup();
             if (result.Success)
@@ -105,7 +116,7 @@ namespace ElephantBackup
 
         private void DoCreateConfig()
         {
-            string configPath = BackupConfig.GetDefaultConfigFilePath();
+            string configPath = BackupConfig.GetConfigPath();
             if (File.Exists(configPath))
             {
                 Console.WriteLine("{0} already exists. Overwrite (y/n)?", configPath);
@@ -120,7 +131,5 @@ namespace ElephantBackup
             }
             Console.WriteLine("Config file written to {0}", configPath);
         }
-
-
     }
 }

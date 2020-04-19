@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Security.Cryptography;
+
 
 namespace ElephantBackup
 {
@@ -42,7 +44,7 @@ namespace ElephantBackup
                 {
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
-                    DoBackup(source.Path, targetPath, logFileWtr,
+                    DoBackup(source.Path, targetPath, config.Options.Verify, logFileWtr,
                              ref bytesCopied, ref filesCopied, ref directoriesCopied);
                 }
                 result.Success = true;
@@ -73,9 +75,12 @@ namespace ElephantBackup
         }
 
 
+        private byte[] copyBuff = new byte[10240];
+
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
+            bool verify,
             StreamWriter logFileWtr,
             ref long bytesCopied,
             ref long filesCopied,
@@ -89,21 +94,100 @@ namespace ElephantBackup
                 var sourceFileLen = new FileInfo(sourceFilePath).Length;
                 if (callbacks != null)
                     callbacks.FileBackupMessage(sourceFilePath, targetFilePath);
-                File.Copy(sourceFilePath, targetFilePath);
+                string sourceHash, targetHash;
+                CopyFile(sourceFilePath, targetFilePath, copyBuff, verify, out sourceHash, out targetHash);
+                if (sourceHash != targetHash)
+                    throw new IOException(string.Format("Backup verify failed for {0}", sourceFilePath));
                 filesCopied += 1;
                 bytesCopied += sourceFileLen;
                 if (logFileWtr != null)
-                    logFileWtr.WriteLine("{0} : {1} => {2} : {3} bytes",
-                                         DateTime.Now, sourceFilePath, targetFilePath, sourceFileLen);
+                {
+                    logFileWtr.Write("{0}, {1} => {2}, {3} bytes",
+                                     DateTime.Now, sourceFilePath, targetFilePath, sourceFileLen);
+                    if (verify)
+                        logFileWtr.Write(", {0}", sourceHash);
+                    logFileWtr.WriteLine();
+                }
             }
             foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
-                DoBackup(sourceSubdirPath, targetSubdirPath, logFileWtr, ref bytesCopied, ref filesCopied, ref directoriesCopied);
+                DoBackup(sourceSubdirPath, targetSubdirPath, verify, logFileWtr, ref bytesCopied, ref filesCopied, ref directoriesCopied);
                 directoriesCopied += 1;
             }
         }
 
+
+
+
+        private static void CopyFile(
+            string sourceFilePath,
+            string targetFilePath,
+            byte[] copyBuff,
+            bool verify,
+            out string sourceHashStr,
+            out string targetHashStr)
+        {
+            MD5 sourceHash = verify ? MD5.Create() : null;
+            using (var sourceStm = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read))
+            {
+                using (var targetStm = new FileStream(targetFilePath, FileMode.Create, FileAccess.Write))
+                {
+                    while (true)
+                    {
+                        var bytesRead = sourceStm.Read(copyBuff, 0, copyBuff.Length);
+                        targetStm.Write(copyBuff, 0, bytesRead);
+                        if (sourceHash != null)
+                        {
+                            sourceHash.TransformBlock(copyBuff, 0, bytesRead, copyBuff, 0);
+                        }
+                        if (bytesRead < copyBuff.Length)
+                        {
+                            if (sourceHash != null)
+                            {
+                                sourceHash.TransformFinalBlock(copyBuff, 0, copyBuff.Length);
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+            sourceHashStr = (sourceHash.Hash != null) ? HashToString(sourceHash.Hash) : null;
+
+            if (verify)
+            {
+                var targetHash = MD5.Create();
+                using (var targetStm = new FileStream(targetFilePath, FileMode.Open, FileAccess.Read))
+                {
+                    while (true)
+                    {
+                        var bytesRead = targetStm.Read(copyBuff, 0, copyBuff.Length);
+                        targetHash.TransformBlock(copyBuff, 0, bytesRead, copyBuff, 0);
+                        if (bytesRead < copyBuff.Length)
+                        {
+                            targetHash.TransformFinalBlock(copyBuff, 0, copyBuff.Length);
+                            break;
+                        }
+                    }
+                }
+                targetHashStr = HashToString(targetHash.Hash);
+            }
+            else
+            {
+                targetHashStr = null;
+            }
+        }
+
+
+        private static string HashToString(byte[] hash)
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++)
+            {
+                sb.Append(hash[i].ToString("x2"));
+            }
+            return sb.ToString();
+        }
 
 
 

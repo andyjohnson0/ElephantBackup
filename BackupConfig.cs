@@ -72,12 +72,6 @@ namespace ElephantBackup {
         
         private string pathField;
         
-        private bool verifyField;
-        
-        public BackupTarget() {
-            this.verifyField = false;
-        }
-        
         /// <remarks/>
         public string Path {
             get {
@@ -85,17 +79,6 @@ namespace ElephantBackup {
             }
             set {
                 this.pathField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.ComponentModel.DefaultValueAttribute(false)]
-        public bool Verify {
-            get {
-                return this.verifyField;
-            }
-            set {
-                this.verifyField = value;
             }
         }
     }
@@ -133,8 +116,11 @@ namespace ElephantBackup {
         
         private string globalExcludeField;
         
+        private bool verifyField;
+        
         public Options() {
             this.createLogFileField = true;
+            this.verifyField = false;
         }
         
         /// <remarks/>
@@ -155,6 +141,17 @@ namespace ElephantBackup {
             }
             set {
                 this.globalExcludeField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.ComponentModel.DefaultValueAttribute(false)]
+        public bool Verify {
+            get {
+                return this.verifyField;
+            }
+            set {
+                this.verifyField = value;
             }
         }
     }
