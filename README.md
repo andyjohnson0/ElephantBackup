@@ -1,12 +1,12 @@
 # Elephant Backup
 
-Elephant Backup is a simple backup application for Windows. You can use it to back up one or more directory hierarchies
-to a target such as a removable device or local directory. Files are stored as exact copies,making it suitable for
-long-term storage of data.
+Elephant Backup is a simple console-based backup application for Windows. You can use it to back up one or more directory
+hierarchies to a target such as a removable device or local directory. Files are stored as exact copies, making it suitable
+for long-term storage of data.
 
 ## Getting Started
 
-1. Download the per-build binary, or clone the repo and build it yourself.
+1. Download the pre-built binary, or clone the repo and build it yourself.
 
 2. Add eb.exe to your path
 
@@ -21,6 +21,8 @@ long-term storage of data.
 
 ## Author
 
-Andrew Johnson - http://andyjohnson.uk
+Andy Johnson - http://andyjohnson.uk
 
 ## Licence
+
+This project is licensed under the terms of the MIT license.
