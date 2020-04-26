@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace uk.andyjohnson.ElephantBackup
 {
+    /// <summary>
+    /// a simplem command-line parser.
+    /// </summary>
     public class CommandLineParser
     {
         public CommandLineParser(string[] argValues)

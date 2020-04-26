@@ -9,8 +9,15 @@ using System.Xml.Serialization;
 
 namespace uk.andyjohnson.ElephantBackup
 {
+    /// <summary>
+    /// Extension methods for the auto-generated Backupconfig class.
+    /// </summary>
     public partial class BackupConfig
     {
+        /// <summary>
+        /// Factory.
+        /// </summary>
+        /// <returns>Populated BackupConfig instance.</returns>
         public static BackupConfig Create()
         {
             var doc = new BackupConfig()
@@ -85,6 +92,9 @@ namespace uk.andyjohnson.ElephantBackup
 
         #region Loading
 
+        /// <summary>
+        /// Folders (in order) to search for config file.
+        /// </summary>
         private static DirectoryInfo[] defaultConfigDirs = new DirectoryInfo[]
         {
 #if DEBUG
@@ -108,6 +118,9 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        /// <summary>
+        /// Config file names.
+        /// </summary>
         private static string[] defaultConfigFilenames = new string[]
         {
             "eb.config",

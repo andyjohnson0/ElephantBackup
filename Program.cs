@@ -9,8 +9,16 @@ using System.Diagnostics;
 
 namespace uk.andyjohnson.ElephantBackup
 {
+    /// <summary>
+    /// Main driver class.
+    /// </summary>
     class Program : IBackupCallbacks
     {
+        /// <summary>
+        /// main entry point.
+        /// </summary>
+        /// <param name="args">Command-line arguments</param>
+        /// <returns>Completion staus. 0=ok, 1=error.</returns>
         static int Main(string[] args)
         {
             return new Program().DoMain(args) ? 0 : 1;
@@ -23,6 +31,11 @@ namespace uk.andyjohnson.ElephantBackup
         static extern uint GetConsoleProcessList(uint[] ProcessList, uint ProcessCount);
 
 
+        /// <summary>
+        /// Top-level driver function.
+        /// </summary>
+        /// <param name="args">Command-line arguments.</param>
+        /// <returns>Success of requested operation.</returns>
         private bool DoMain(string[] args)
         { 
             var success = true;
@@ -41,7 +54,10 @@ namespace uk.andyjohnson.ElephantBackup
                 success = DoBackup();
             }
 
-
+            // If exiting would cause the command window to immediately close then prompt the
+            // user to press enter first so that they can see how the backup completed.
+            // We do this by inspecting the console process list. If theres only one entry then
+            // we prompt before exiting.
             if (GetConsoleProcessList(new uint[1], 1) == 1)
             {
                 Console.WriteLine("[Press Enter to finish]");
@@ -52,6 +68,10 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        /// <summary>
+        /// Perform a backup.
+        /// </summary>
+        /// <returns>true if the backup succeeded</returns>
         private bool DoBackup()
         {
             var config = BackupConfig.Load();
@@ -67,7 +87,7 @@ namespace uk.andyjohnson.ElephantBackup
             }
 
             var bm = new BackupManager(config, this);
-            var result = bm.DoBackup();
+            var result = bm.DoBackup();  // actually do the backup.
             if (result.Success)
                 Console.WriteLine("Backup succeeded after {0)", result.Timetaken);
             else
@@ -119,6 +139,9 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        /// <summary>
+        /// Create a blank configuration file.
+        /// </summary>
         private void DoCreateConfig()
         {
             string configPath = BackupConfig.GetConfigPath();

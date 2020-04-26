@@ -8,8 +8,16 @@ using System.Security.Cryptography;
 
 namespace uk.andyjohnson.ElephantBackup
 {
+    /// <summary>
+    /// Manages the backup process.
+    /// </summary>
     public class BackupManager
     {
+        /// <summary>
+        /// Constructor. Initialise a BackupManager object.
+        /// </summary>
+        /// <param name="config">Configuation.</param>
+        /// <param name="callbacks">Reference to an object implementing IBackupCallbacks.</param>
         public BackupManager(
             BackupConfig config,
             IBackupCallbacks callbacks)
@@ -22,6 +30,10 @@ namespace uk.andyjohnson.ElephantBackup
         private IBackupCallbacks callbacks;
 
 
+        /// <summary>
+        /// Performa backup using the supplied configuration.
+        /// </summary>
+        /// <returns>BackupResult object describing the outcome.</returns>
         public BackupResult DoBackup()
         {
             var result = new BackupResult();
@@ -30,6 +42,7 @@ namespace uk.andyjohnson.ElephantBackup
             StreamWriter logFileWtr = null;
             if ((config.Options != null) && config.Options.CreateLogFile)
             {
+                // Create log file.
                 Directory.CreateDirectory(config.BackupTarget.Path);
                 result.LogFilePath = Path.Combine(config.BackupTarget.Path, "backup.log");
                 logFileWtr = new StreamWriter(result.LogFilePath, false);
@@ -41,6 +54,8 @@ namespace uk.andyjohnson.ElephantBackup
             {
                 foreach (var source in config.BackupSource)
                 {
+                    // Create a top-level directory for each backup root in the configuration.
+                    // We need to make sure these are unique.
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
                     DoBackup(source.Path, targetPath, config.Options.Verify, logFileWtr,
@@ -76,6 +91,16 @@ namespace uk.andyjohnson.ElephantBackup
 
         private byte[] copyBuff = new byte[10240];
 
+        /// <summary>
+        /// backup a directory.
+        /// </summary>
+        /// <param name="sourceDirPath">Source directory.</param>
+        /// <param name="targetDirPath">Target directory.</param>
+        /// <param name="verify">Verify each file copy?</param>
+        /// <param name="logFileWtr">Log file writer. Can be null if no logging.</param>
+        /// <param name="bytesCopied">(out) total bytes copied.</param>
+        /// <param name="filesCopied">(out) total files copied.</param>
+        /// <param name="directoriesCopied">(out) total directories copied.</param>
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
@@ -87,6 +112,7 @@ namespace uk.andyjohnson.ElephantBackup
         {
             Directory.CreateDirectory(targetDirPath);
 
+            // Backup files.
             foreach(var sourceFilePath in EnumerateFiles(sourceDirPath, new string[0]))
             {
                 var targetFilePath = Path.Combine(targetDirPath, sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1));
@@ -108,6 +134,8 @@ namespace uk.andyjohnson.ElephantBackup
                     logFileWtr.WriteLine();
                 }
             }
+
+            // Recurse subdirectories.
             foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
@@ -118,7 +146,15 @@ namespace uk.andyjohnson.ElephantBackup
 
 
 
-
+        /// <summary>
+        /// copy a file with optional verify
+        /// </summary>
+        /// <param name="sourceFilePath">source file path.</param>
+        /// <param name="targetFilePath">Target file path.</param>
+        /// <param name="copyBuff">Copy buffer.</param>
+        /// <param name="verify">Verify copy?</param>
+        /// <param name="sourceHashStr">(out) Source file MD5 hash.</param>
+        /// <param name="targetHashStr">(out) Target file MD5 hash.</param>
         private static void CopyFile(
             string sourceFilePath,
             string targetFilePath,
@@ -153,6 +189,7 @@ namespace uk.andyjohnson.ElephantBackup
             }
             sourceHashStr = (sourceHash.Hash != null) ? HashToString(sourceHash.Hash) : null;
 
+            // if we're verifying the copy then re-hash the target file.
             if (verify)
             {
                 var targetHash = MD5.Create();
@@ -178,6 +215,11 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        /// <summary>
+        /// Utility function to convert an MD5 hash to a hex string.
+        /// </summary>
+        /// <param name="hash">MD5 hash</param>
+        /// <returns>String representation</returns>
         private static string HashToString(byte[] hash)
         {
             var sb = new StringBuilder();
@@ -190,8 +232,12 @@ namespace uk.andyjohnson.ElephantBackup
 
 
 
-
-
+        /// <summary>
+        /// Utility function to enumerate files in a directory with the option to exclude specified extensions.
+        /// </summary>
+        /// <param name="path">Directory path.</param>
+        /// <param name="excludeExtensions">Extensions to exclude (e.g. ".obj")</param>
+        /// <returns>Enumerator</returns>
         private static IEnumerable<string> EnumerateFiles(
             string path,
             string[] excludeExtensions)
@@ -200,7 +246,12 @@ namespace uk.andyjohnson.ElephantBackup
                             .Where(file => !excludeExtensions.Any(x => file.EndsWith(x, StringComparison.OrdinalIgnoreCase)));
         }
 
-
+        /// <summary>
+        /// Utility function to enumerate subdirectories in a directory with the option to exclude specified names.
+        /// </summary>
+        /// <param name="path">Directory path.</param>
+        /// <param name="excludeExtensions">Directories to exclude (e.g. "bin")</param>
+        /// <returns>Enumerator</returns>
         private static IEnumerable<string> EnumerateDirectories(
             string path,
             string[] exclude)
@@ -210,6 +261,12 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        /// <summary>
+        /// Create a unique name for a directory within a parent.
+        /// </summary>
+        /// <param name="sourceDirName">directory name.</param>
+        /// <param name="targetParentDirPath">Base name.</param>
+        /// <returns>Unique name.</returns>
         private static string BuildTargetPath(
             string sourceDirName, 
             string targetParentDirPath)

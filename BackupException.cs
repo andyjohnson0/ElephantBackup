@@ -5,6 +5,9 @@ using System.Text;
 
 namespace uk.andyjohnson.ElephantBackup
 {
+    /// <summary>
+    /// Wraps exceptions occurring during a backup.
+    /// </summary>
     public class BackupException : Exception
     {
         public BackupException(string message) : base(message)
@@ -15,6 +18,9 @@ namespace uk.andyjohnson.ElephantBackup
         {
         }
 
+        /// <summary>
+        /// Faulting BackupManager instance.
+        /// </summary>
         public BackupManager BackupManager { get; set; }
     }
 }
