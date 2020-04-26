@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Diagnostics;
 
 
 namespace uk.andyjohnson.ElephantBackup
@@ -100,7 +100,11 @@ namespace uk.andyjohnson.ElephantBackup
 
         private void DoHelp()
         {
-            Console.WriteLine("ElephantBackup by Andy Johnson - andy@andyjohnson.uk");
+            var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+            string version = fvi.FileVersion;
+
+            Console.WriteLine("Elephant Backup v{0} by Andy Johnson - https://andyjohnson.uk", version);
             Console.WriteLine();
             Console.WriteLine("Usage:");
             Console.WriteLine("  eb [/? | /help]");
@@ -109,6 +113,8 @@ namespace uk.andyjohnson.ElephantBackup
             Console.WriteLine("    - Create a blank config file in the user's home directory");
             Console.WriteLine("  eb");
             Console.WriteLine("    - Perform a backup");
+            Console.WriteLine();
+            Console.WriteLine("For more info see https://github.com/andyjohnson0/ElephantBackup");
             Console.WriteLine();
         }
 
