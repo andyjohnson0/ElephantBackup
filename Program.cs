@@ -77,7 +77,7 @@ namespace uk.andyjohnson.ElephantBackup
             var config = BackupConfig.Load();
             if (config == null)
             {
-                Console.WriteLine("Error: Config file not found.";
+                Console.WriteLine("Error: Config file not found.");
                 return false;
             }
             if ((config?.BackupTarget == null) || (config.BackupTarget.Path == null))
