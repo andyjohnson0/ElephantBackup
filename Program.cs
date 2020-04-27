@@ -157,7 +157,7 @@ namespace uk.andyjohnson.ElephantBackup
                     return;
             }
 
-            using(var wtr = new StreamWriter(configPath, false))
+            using(var wtr = new StreamWriter(configPath, false, Encoding.UTF8))
             {
                 var configStr = BackupConfig.CreateExample().ToString();
                 wtr.Write(configStr);

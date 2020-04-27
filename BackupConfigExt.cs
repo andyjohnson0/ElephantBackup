@@ -36,7 +36,8 @@ namespace uk.andyjohnson.ElephantBackup
                 Options = new Options()
                 {
                     GlobalExclude = string.Empty,
-                    Verify = false
+                    Verify = false,
+                    CreateLogFile = true
                 }
             };
             return doc;
@@ -61,14 +62,15 @@ namespace uk.andyjohnson.ElephantBackup
                 Indent = true,
                 IndentChars = "  ",
                 NewLineChars = "\r\n",
-                NewLineHandling = NewLineHandling.Replace
+                NewLineHandling = NewLineHandling.Replace,
+                Encoding = Encoding.UTF8
             };
             using (var wtr = XmlWriter.Create(sb, settings))
             {
                 var ser = new XmlSerializer(typeof(BackupConfig));
                 ser.Serialize(wtr, this);
             }
-            return sb.ToString();
+            return sb.ToString().Replace("encoding=\"utf-16\"", "encoding=\"utf-8\"");
         }
 
 
