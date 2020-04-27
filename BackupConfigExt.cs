@@ -95,27 +95,15 @@ namespace uk.andyjohnson.ElephantBackup
         /// <summary>
         /// Folders (in order) to search for config file.
         /// </summary>
-        private static DirectoryInfo[] defaultConfigDirs = new DirectoryInfo[]
+        private static string[] defaultConfigDirs = new string[]
         {
 #if DEBUG
-            new DirectoryInfo("../../"),
+            "../../",
 #endif
-            new DirectoryInfo(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%")),
-            new DirectoryInfo(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)),
-            new DirectoryInfo(Environment.CurrentDirectory)
+            Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"),
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+            Environment.CurrentDirectory
         };
-
-
-        public static BackupConfig Load()
-        {
-            foreach(var path in defaultConfigDirs)
-            {
-                var config = Load(path);
-                if (config != null)
-                    return config;
-            }
-            return null;
-        }
 
 
         /// <summary>
@@ -127,20 +115,30 @@ namespace uk.andyjohnson.ElephantBackup
             "elephantbackup.config"
         };
 
-        public static BackupConfig Load(DirectoryInfo di)
+
+
+        public static BackupConfig Load()
         {
-            foreach(var filename in defaultConfigFilenames)
+            foreach(var dir in defaultConfigDirs)
             {
-                var config = Load(new FileInfo(Path.Combine(di.FullName, filename)));
-                if (config != null)
-                    return config;
+                foreach (var filename in defaultConfigFilenames)
+                {
+                    var path = Path.Combine(dir, filename);
+                    if (File.Exists(path))
+                    {
+                        var config = Load(path);
+                        if (config != null)
+                            return config;
+                    }
+                }
             }
             return null;
         }
 
-        public static BackupConfig Load(FileInfo fi)
+
+        public static BackupConfig Load(string path)
         {
-            using (var stm = new FileStream(fi.FullName , FileMode.Open))
+            using (var stm = new FileStream(path, FileMode.Open))
             {
                 var root = new XmlRootAttribute();
                 root.ElementName = "BackupConfig";

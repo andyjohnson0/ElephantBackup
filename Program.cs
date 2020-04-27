@@ -75,6 +75,11 @@ namespace uk.andyjohnson.ElephantBackup
         private bool DoBackup()
         {
             var config = BackupConfig.Load();
+            if (config == null)
+            {
+                Console.WriteLine("Error: Config file not found.";
+                return false;
+            }
             if ((config?.BackupTarget == null) || (config.BackupTarget.Path == null))
             {
                 Console.WriteLine("Error: No target specified");
