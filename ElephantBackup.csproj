@@ -7,7 +7,7 @@
     <ProjectGuid>{50926FB9-7DFE-42BF-A7A1-48447F019EBC}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>uk.andyjohnson.ElephantBackup</RootNamespace>
-    <AssemblyName>ElephantBackup</AssemblyName>
+    <AssemblyName>eb</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
