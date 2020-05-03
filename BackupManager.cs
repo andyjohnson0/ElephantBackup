@@ -112,12 +112,12 @@ namespace uk.andyjohnson.ElephantBackup
             catch(System.UnauthorizedAccessException ex)
             {
                 progress.DirectoriesSkipped += 1;
-                var msg = string.Format("Failed to enumerate {0}. Skipped.", sourceDirPath);
+                var msg = string.Format("{0} Directory skipped.", ex.Message);
                 if (logFileWtr != null)
                 {
                     logFileWtr.WriteLine(msg);
                 }
-                callbacks.ErrorMessage(msg, ex);
+                callbacks.ErrorMessage(msg);
                 return;
             }
 
@@ -126,7 +126,7 @@ namespace uk.andyjohnson.ElephantBackup
                 var targetFilePath = Path.Combine(targetDirPath, sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1));
                 var sourceFileLen = new FileInfo(sourceFilePath).Length;
                 if (callbacks != null)
-                    callbacks.FileBackupMessage(sourceFilePath, targetFilePath);
+                    callbacks.InfoMessage("{0} => {1}", sourceFilePath, targetFilePath);
                 string sourceHash, targetHash;
                 try
                 {
@@ -135,12 +135,12 @@ namespace uk.andyjohnson.ElephantBackup
                 catch(UnauthorizedAccessException ex)
                 {
                     progress.FilesSkipped += 1;
-                    var msg = string.Format("Failed to copy {0}. Skipped.", sourceFilePath);
+                    var msg = string.Format("{0} File skipped.", ex.Message);
                     if (logFileWtr != null)
                     {
                         logFileWtr.WriteLine(msg);
                     }
-                    callbacks.ErrorMessage(msg, ex);
+                    callbacks.ErrorMessage(msg);
                     continue;
                 }
                 if (sourceHash != targetHash)

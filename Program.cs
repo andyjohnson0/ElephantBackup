@@ -116,16 +116,16 @@ namespace uk.andyjohnson.ElephantBackup
 
         #region IBackupCallbacks
 
-        void IBackupCallbacks.FileBackupMessage(string sourceFilePath, string targetFilePath)
+        void IBackupCallbacks.InfoMessage(string message, params string[] args)
         {
-            Console.WriteLine("{0} => {1}", sourceFilePath, targetFilePath);
+            Console.WriteLine(message, args);
         }
 
-        void IBackupCallbacks.ErrorMessage(string message, Exception ex)
+        void IBackupCallbacks.ErrorMessage(string message, params string[] args)
         {
             var c = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Error: " + message);
+            Console.WriteLine("Error: " + message, args);
             Console.ForegroundColor = c;
         }
 

@@ -11,12 +11,17 @@ namespace uk.andyjohnson.ElephantBackup
     public interface IBackupCallbacks
     {
         /// <summary>
-        /// Display a message.
+        /// Handle an information message.
         /// </summary>
-        /// <param name="sourceFilePath">Source file path.</param>
-        /// <param name="targetFilePath">Target file path.</param>
-        void FileBackupMessage(string sourceFilePath, string targetFilePath);
+        /// <param name="message">Information message.</param>
+        /// <param name="args">Argumentd</param>
+        void InfoMessage(string message, params string[] args);
 
-        void ErrorMessage(string message, Exception ex);
+        /// <summary>
+        /// Handle an error message.
+        /// </summary>
+        /// <param name="message">Information message.</param>
+        /// <param name="args">Argumentd</param>
+        void ErrorMessage(string message, params string[] args);
     }
 }
