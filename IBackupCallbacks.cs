@@ -16,5 +16,7 @@ namespace uk.andyjohnson.ElephantBackup
         /// <param name="sourceFilePath">Source file path.</param>
         /// <param name="targetFilePath">Target file path.</param>
         void FileBackupMessage(string sourceFilePath, string targetFilePath);
+
+        void ErrorMessage(string message, Exception ex);
     }
 }

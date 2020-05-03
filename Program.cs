@@ -94,7 +94,7 @@ namespace uk.andyjohnson.ElephantBackup
             var bm = new BackupManager(config, this);
             var result = bm.DoBackup();  // actually do the backup.
             if (result.Success)
-                Console.WriteLine("Backup succeeded after {0)", result.Timetaken);
+                Console.WriteLine("Backup succeeded after {0}", result.Timetaken);
             else
                 Console.WriteLine("Backup failed after {0} - {1}",
                                     result.Timetaken,
@@ -104,6 +104,8 @@ namespace uk.andyjohnson.ElephantBackup
             Console.WriteLine("{0} bytes copied", result.BytesCopied);
             Console.WriteLine("{0} files copied", result.FilesCopied);
             Console.WriteLine("{0} directories copied", result.DirectoriesCopied);
+            Console.WriteLine("{0} files skipped", result.FilesSkipped);
+            Console.WriteLine("{0} directories skipped", result.DirectoriesSkipped);
             if (result.LogFilePath != null)
                 Console.WriteLine("Log file created at {0}", result.LogFilePath);
 
@@ -117,6 +119,14 @@ namespace uk.andyjohnson.ElephantBackup
         void IBackupCallbacks.FileBackupMessage(string sourceFilePath, string targetFilePath)
         {
             Console.WriteLine("{0} => {1}", sourceFilePath, targetFilePath);
+        }
+
+        void IBackupCallbacks.ErrorMessage(string message, Exception ex)
+        {
+            var c = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Error: " + message);
+            Console.ForegroundColor = c;
         }
 
         #endregion IBackupCallbacks

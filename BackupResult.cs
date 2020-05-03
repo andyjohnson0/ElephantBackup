@@ -49,6 +49,16 @@ namespace uk.andyjohnson.ElephantBackup
         public long DirectoriesCopied { get; set; }
 
         /// <summary>
+        /// Number of files skipped.
+        /// </summary>
+        public long FilesSkipped { get; set; }
+
+        /// <summary>
+        /// Number of directories skipped.
+        /// </summary>
+        public long DirectoriesSkipped { get; set; }
+
+        /// <summary>
         /// path to log file.
         /// </summary>
         public string LogFilePath { get; set; }

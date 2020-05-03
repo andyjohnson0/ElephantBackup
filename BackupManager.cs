@@ -49,7 +49,6 @@ namespace uk.andyjohnson.ElephantBackup
                 logFileWtr.WriteLine("Starting at {0}", result.StartTime);
             }
 
-            long bytesCopied = 0L, filesCopied = 0L, directoriesCopied = 0L;
             try
             {
                 foreach (var source in config.BackupSource)
@@ -58,8 +57,7 @@ namespace uk.andyjohnson.ElephantBackup
                     // We need to make sure these are unique.
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
-                    DoBackup(source.Path, targetPath, config.Options.Verify, logFileWtr,
-                             ref bytesCopied, ref filesCopied, ref directoriesCopied);
+                    DoBackup(source.Path, targetPath, config.Options.Verify, logFileWtr, result);
                 }
                 result.Success = true;
             }
@@ -75,9 +73,6 @@ namespace uk.andyjohnson.ElephantBackup
             finally
             {
                 result.EndTime = DateTime.Now;
-                result.BytesCopied = bytesCopied;
-                result.FilesCopied = filesCopied;
-                result.DirectoriesCopied = directoriesCopied;
                 if (logFileWtr != null)
                 {
                     logFileWtr.WriteLine("Finished at {0}", result.EndTime);
@@ -98,33 +93,60 @@ namespace uk.andyjohnson.ElephantBackup
         /// <param name="targetDirPath">Target directory.</param>
         /// <param name="verify">Verify each file copy?</param>
         /// <param name="logFileWtr">Log file writer. Can be null if no logging.</param>
-        /// <param name="bytesCopied">(out) total bytes copied.</param>
-        /// <param name="filesCopied">(out) total files copied.</param>
-        /// <param name="directoriesCopied">(out) total directories copied.</param>
+        /// <param name="progress">Backup result to be updated.</param>
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
             bool verify,
             StreamWriter logFileWtr,
-            ref long bytesCopied,
-            ref long filesCopied,
-            ref long directoriesCopied)
+            BackupResult progress)
         {
             Directory.CreateDirectory(targetDirPath);
 
             // Backup files.
-            foreach(var sourceFilePath in EnumerateFiles(sourceDirPath, new string[0]))
+            IEnumerable<string> filesEnum = null;
+            try
+            {
+                filesEnum = EnumerateFiles(sourceDirPath, new string[0]);
+            }
+            catch(System.UnauthorizedAccessException ex)
+            {
+                progress.DirectoriesSkipped += 1;
+                var msg = string.Format("Failed to enumerate {0}. Skipped.", sourceDirPath);
+                if (logFileWtr != null)
+                {
+                    logFileWtr.WriteLine(msg);
+                }
+                callbacks.ErrorMessage(msg, ex);
+                return;
+            }
+
+            foreach(var sourceFilePath in filesEnum)
             {
                 var targetFilePath = Path.Combine(targetDirPath, sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1));
                 var sourceFileLen = new FileInfo(sourceFilePath).Length;
                 if (callbacks != null)
                     callbacks.FileBackupMessage(sourceFilePath, targetFilePath);
                 string sourceHash, targetHash;
-                CopyFile(sourceFilePath, targetFilePath, copyBuff, verify, out sourceHash, out targetHash);
+                try
+                {
+                    CopyFile(sourceFilePath, targetFilePath, copyBuff, verify, out sourceHash, out targetHash);
+                }
+                catch(UnauthorizedAccessException ex)
+                {
+                    progress.FilesSkipped += 1;
+                    var msg = string.Format("Failed to copy {0}. Skipped.", sourceFilePath);
+                    if (logFileWtr != null)
+                    {
+                        logFileWtr.WriteLine(msg);
+                    }
+                    callbacks.ErrorMessage(msg, ex);
+                    continue;
+                }
                 if (sourceHash != targetHash)
                     throw new IOException(string.Format("Backup verify failed for {0}", sourceFilePath));
-                filesCopied += 1;
-                bytesCopied += sourceFileLen;
+                progress.FilesCopied += 1;
+                progress.BytesCopied += sourceFileLen;
                 if (logFileWtr != null)
                 {
                     logFileWtr.Write("{0}, {1} => {2}, {3} bytes",
@@ -139,8 +161,8 @@ namespace uk.andyjohnson.ElephantBackup
             foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
-                DoBackup(sourceSubdirPath, targetSubdirPath, verify, logFileWtr, ref bytesCopied, ref filesCopied, ref directoriesCopied);
-                directoriesCopied += 1;
+                DoBackup(sourceSubdirPath, targetSubdirPath, verify, logFileWtr, progress);
+                progress.DirectoriesCopied += 1;
             }
         }
 
