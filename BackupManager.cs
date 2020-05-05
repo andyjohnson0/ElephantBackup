@@ -17,17 +17,17 @@ namespace uk.andyjohnson.ElephantBackup
         /// Constructor. Initialise a BackupManager object.
         /// </summary>
         /// <param name="config">Configuation.</param>
-        /// <param name="callbacks">Reference to an object implementing IBackupCallbacks.</param>
         public BackupManager(
-            BackupConfig config,
-            IBackupCallbacks callbacks)
+            BackupConfig config)
         {
             this.config = config;
-            this.callbacks = callbacks;
         }
 
         private BackupConfig config;
-        private IBackupCallbacks callbacks;
+        private StreamWriter logFileWtr;
+
+        public EventHandler<BackupEventArgs> OnError;
+        public EventHandler<BackupEventArgs> OnInformation;
 
 
         /// <summary>
@@ -36,17 +36,19 @@ namespace uk.andyjohnson.ElephantBackup
         /// <returns>BackupResult object describing the outcome.</returns>
         public BackupResult DoBackup()
         {
+            this.OnError += this.OnEvent_Error;
+            this.OnInformation += this.OnEvent_Information;
+
             var result = new BackupResult();
             result.StartTime = DateTime.Now;
 
-            StreamWriter logFileWtr = null;
             if ((config.Options != null) && config.Options.CreateLogFile)
             {
                 // Create log file.
                 Directory.CreateDirectory(config.BackupTarget.Path);
                 result.LogFilePath = Path.Combine(config.BackupTarget.Path, "backup.log");
                 logFileWtr = new StreamWriter(result.LogFilePath, false);
-                logFileWtr.WriteLine("Starting at {0}", result.StartTime);
+                OnInformation?.Invoke(this, new BackupEventArgs("Starting at {0}", result.StartTime));
             }
 
             try
@@ -57,7 +59,7 @@ namespace uk.andyjohnson.ElephantBackup
                     // We need to make sure these are unique.
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
-                    DoBackup(source.Path, targetPath, config.Options.Verify, logFileWtr, result);
+                    DoBackup(source.Path, targetPath, config.Options.Verify, result);
                 }
                 result.Success = true;
             }
@@ -77,7 +79,10 @@ namespace uk.andyjohnson.ElephantBackup
                 {
                     logFileWtr.WriteLine("Finished at {0}", result.EndTime);
                     logFileWtr.Close();
+                    logFileWtr = null;
                 }
+                this.OnError -= this.OnEvent_Error;
+                this.OnInformation -= this.OnEvent_Information;
             }
 
             return result;
@@ -92,13 +97,11 @@ namespace uk.andyjohnson.ElephantBackup
         /// <param name="sourceDirPath">Source directory.</param>
         /// <param name="targetDirPath">Target directory.</param>
         /// <param name="verify">Verify each file copy?</param>
-        /// <param name="logFileWtr">Log file writer. Can be null if no logging.</param>
         /// <param name="progress">Backup result to be updated.</param>
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
             bool verify,
-            StreamWriter logFileWtr,
             BackupResult progress)
         {
             Directory.CreateDirectory(targetDirPath);
@@ -112,12 +115,8 @@ namespace uk.andyjohnson.ElephantBackup
             catch(System.UnauthorizedAccessException ex)
             {
                 progress.DirectoriesSkipped += 1;
-                var msg = string.Format("{0} Directory skipped.", ex.Message);
-                if (logFileWtr != null)
-                {
-                    logFileWtr.WriteLine(msg);
-                }
-                callbacks.ErrorMessage(msg);
+                OnError?.Invoke(this, new BackupEventArgs("{0} Directory skipped.", ex.Message));
+
                 return;
             }
 
@@ -125,8 +124,7 @@ namespace uk.andyjohnson.ElephantBackup
             {
                 var targetFilePath = Path.Combine(targetDirPath, sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1));
                 var sourceFileLen = new FileInfo(sourceFilePath).Length;
-                if (callbacks != null)
-                    callbacks.InfoMessage("{0} => {1}", sourceFilePath, targetFilePath);
+                OnInformation?.Invoke(this, new BackupEventArgs("{0} => {1}", sourceFilePath, targetFilePath));
                 string sourceHash, targetHash;
                 try
                 {
@@ -135,33 +133,24 @@ namespace uk.andyjohnson.ElephantBackup
                 catch(UnauthorizedAccessException ex)
                 {
                     progress.FilesSkipped += 1;
-                    var msg = string.Format("{0} File skipped.", ex.Message);
-                    if (logFileWtr != null)
-                    {
-                        logFileWtr.WriteLine(msg);
-                    }
-                    callbacks.ErrorMessage(msg);
+                    OnError?.Invoke(this, new BackupEventArgs("{0} File skipped.", ex.Message));
                     continue;
                 }
                 if (sourceHash != targetHash)
                     throw new IOException(string.Format("Backup verify failed for {0}", sourceFilePath));
                 progress.FilesCopied += 1;
                 progress.BytesCopied += sourceFileLen;
-                if (logFileWtr != null)
-                {
-                    logFileWtr.Write("{0}, {1} => {2}, {3} bytes",
-                                     DateTime.Now, sourceFilePath, targetFilePath, sourceFileLen);
-                    if (verify)
-                        logFileWtr.Write(", {0}", sourceHash);
-                    logFileWtr.WriteLine();
-                }
+                OnInformation?.Invoke(this,
+                                      new BackupEventArgs("{0}, {1} => {2}, {3} bytes {4}",
+                                                          DateTime.Now, sourceFilePath, targetFilePath, sourceFileLen,
+                                                          verify ? sourceHash : ""));
             }
 
             // Recurse subdirectories.
             foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
-                DoBackup(sourceSubdirPath, targetSubdirPath, verify, logFileWtr, progress);
+                DoBackup(sourceSubdirPath, targetSubdirPath, verify, progress);
                 progress.DirectoriesCopied += 1;
             }
         }
@@ -305,5 +294,25 @@ namespace uk.andyjohnson.ElephantBackup
             throw new Exception("Too many source root directories with same name: " + sourceDirName);
         }
 
+
+        #region Event handlers
+
+        private void OnEvent_Information(object sender, BackupEventArgs args)
+        {
+            if (logFileWtr != null)
+            {
+                logFileWtr.WriteLine(args.Message);
+            }
+        }
+
+        private void OnEvent_Error(object sender, BackupEventArgs args)
+        {
+            if (logFileWtr != null)
+            {
+                logFileWtr.WriteLine("Error: " + args.Message);
+            }
+        }
+
+        #endregion Event handlers
     }
 }

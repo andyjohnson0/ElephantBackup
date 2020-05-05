@@ -12,7 +12,7 @@ namespace uk.andyjohnson.ElephantBackup
     /// <summary>
     /// Main driver class.
     /// </summary>
-    class Program : IBackupCallbacks
+    class Program
     {
         /// <summary>
         /// main entry point.
@@ -91,7 +91,10 @@ namespace uk.andyjohnson.ElephantBackup
                 return false;
             }
 
-            var bm = new BackupManager(config, this);
+            var bm = new BackupManager(config);
+            bm.OnError += this.OnError;
+            bm.OnInformation += this.OnInformation;
+
             var result = bm.DoBackup();  // actually do the backup.
             if (result.Success)
                 Console.WriteLine("Backup succeeded after {0}", result.Timetaken);
@@ -114,22 +117,22 @@ namespace uk.andyjohnson.ElephantBackup
 
 
 
-        #region IBackupCallbacks
+        #region Event handlers
 
-        void IBackupCallbacks.InfoMessage(string message, params string[] args)
+        private void OnInformation(object sender, BackupEventArgs args)
         {
-            Console.WriteLine(message, args);
+            Console.WriteLine(args.Message);
         }
 
-        void IBackupCallbacks.ErrorMessage(string message, params string[] args)
+        private void OnError(object sender, BackupEventArgs args)
         {
             var c = Console.ForegroundColor;
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Error: " + message, args);
+            Console.WriteLine("Error: " + args.Message);
             Console.ForegroundColor = c;
         }
 
-        #endregion IBackupCallbacks
+        #endregion Event handlers
 
 
 

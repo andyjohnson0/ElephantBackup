@@ -93,6 +93,8 @@ namespace uk.andyjohnson.ElephantBackup {
         
         private string pathField;
         
+        private string excludeField;
+        
         /// <remarks/>
         public string Path {
             get {
@@ -100,6 +102,16 @@ namespace uk.andyjohnson.ElephantBackup {
             }
             set {
                 this.pathField = value;
+            }
+        }
+        
+        /// <remarks/>
+        public string Exclude {
+            get {
+                return this.excludeField;
+            }
+            set {
+                this.excludeField = value;
             }
         }
     }

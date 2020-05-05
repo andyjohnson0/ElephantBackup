@@ -61,6 +61,7 @@
       <DependentUpon>BackupConfig.xsd</DependentUpon>
     </Compile>
     <Compile Include="BackupConfigExt.cs" />
+    <Compile Include="BackupEventArgs.cs" />
     <Compile Include="BackupException.cs" />
     <Compile Include="BackupManager.cs" />
     <Compile Include="BackupResult.cs" />
