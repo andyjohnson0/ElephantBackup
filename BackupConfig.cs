@@ -93,7 +93,7 @@ namespace uk.andyjohnson.ElephantBackup {
         
         private string pathField;
         
-        private string excludeField;
+        private string excludeFileTypesField;
         
         /// <remarks/>
         public string Path {
@@ -106,12 +106,12 @@ namespace uk.andyjohnson.ElephantBackup {
         }
         
         /// <remarks/>
-        public string Exclude {
+        public string ExcludeFileTypes {
             get {
-                return this.excludeField;
+                return this.excludeFileTypesField;
             }
             set {
-                this.excludeField = value;
+                this.excludeFileTypesField = value;
             }
         }
     }
@@ -126,7 +126,7 @@ namespace uk.andyjohnson.ElephantBackup {
         
         private bool createLogFileField;
         
-        private string globalExcludeField;
+        private string globalExcludeFileTypesField;
         
         private bool verifyField;
         
@@ -147,12 +147,12 @@ namespace uk.andyjohnson.ElephantBackup {
         }
         
         /// <remarks/>
-        public string GlobalExclude {
+        public string GlobalExcludeFileTypes {
             get {
-                return this.globalExcludeField;
+                return this.globalExcludeFileTypesField;
             }
             set {
-                this.globalExcludeField = value;
+                this.globalExcludeFileTypesField = value;
             }
         }
         

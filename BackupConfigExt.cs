@@ -35,7 +35,7 @@ namespace uk.andyjohnson.ElephantBackup
                 },
                 Options = new Options()
                 {
-                    GlobalExclude = string.Empty,
+                    GlobalExcludeFileTypes = string.Empty,
                     Verify = false,
                     CreateLogFile = true
                 }

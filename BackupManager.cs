@@ -51,15 +51,21 @@ namespace uk.andyjohnson.ElephantBackup
                 OnInformation?.Invoke(this, new BackupEventArgs("Starting at {0}", result.StartTime));
             }
 
+            // Get global filetype exclusions.
+            var globalExcludeFiletypes = config?.Options?.GlobalExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
             try
             {
                 foreach (var source in config.BackupSource)
                 {
+                    var sourceExcludesFileTypes = source?.ExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                    var excludeFileTypes = Combine(globalExcludeFiletypes, sourceExcludesFileTypes);
+
                     // Create a top-level directory for each backup root in the configuration.
                     // We need to make sure these are unique.
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
-                    DoBackup(source.Path, targetPath, config.Options.Verify, result);
+                    DoBackup(source.Path, targetPath, config.Options.Verify, excludeFileTypes, result);
                 }
                 result.Success = true;
             }
@@ -97,11 +103,13 @@ namespace uk.andyjohnson.ElephantBackup
         /// <param name="sourceDirPath">Source directory.</param>
         /// <param name="targetDirPath">Target directory.</param>
         /// <param name="verify">Verify each file copy?</param>
+        /// <param name="excludeFileTypes">File types to exclude</param>
         /// <param name="progress">Backup result to be updated.</param>
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
             bool verify,
+            string[] excludeFileTypes,
             BackupResult progress)
         {
             Directory.CreateDirectory(targetDirPath);
@@ -110,7 +118,7 @@ namespace uk.andyjohnson.ElephantBackup
             IEnumerable<string> filesEnum = null;
             try
             {
-                filesEnum = EnumerateFiles(sourceDirPath, new string[0]);
+                filesEnum = EnumerateFiles(sourceDirPath, excludeFileTypes);
             }
             catch(System.UnauthorizedAccessException ex)
             {
@@ -150,7 +158,7 @@ namespace uk.andyjohnson.ElephantBackup
             foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
-                DoBackup(sourceSubdirPath, targetSubdirPath, verify, progress);
+                DoBackup(sourceSubdirPath, targetSubdirPath, verify, excludeFileTypes, progress);
                 progress.DirectoriesCopied += 1;
             }
         }
@@ -292,6 +300,23 @@ namespace uk.andyjohnson.ElephantBackup
             }
 
             throw new Exception("Too many source root directories with same name: " + sourceDirName);
+        }
+
+
+        public static string[] Combine(
+            string[] arr1,
+            string[] arr2)
+        {
+            int len1 = (arr1 != null) ? arr1.Length : 0;
+            int len2 = (arr2 != null) ? arr2.Length : 0;
+
+            var arr = new string[len1 + len2];
+            if (len1 > 0)
+                Array.Copy(arr1, 0, arr, 0, len1);
+            if (len2 > 0)
+                Array.Copy(arr2, 0, arr, len1, len2);
+
+            return arr;
         }
 
 

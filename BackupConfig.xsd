@@ -26,7 +26,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Path" type="xs:string"/>
-        <xs:element name="Exclude" type="xs:string" minOccurs="0"/>
+        <xs:element name="ExcludeFileTypes" type="xs:string" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -35,7 +35,7 @@
     <xs:complexType>
       <xs:sequence>
         <xs:element name="CreateLogFile" type="xs:boolean" default="true" minOccurs="0"/>
-        <xs:element name="GlobalExclude" type="xs:string" minOccurs="0"/>
+        <xs:element name="GlobalExcludeFileTypes" type="xs:string" minOccurs="0"/>
         <xs:element name="Verify" type="xs:boolean" default="false" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
