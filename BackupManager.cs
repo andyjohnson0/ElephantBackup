@@ -51,21 +51,18 @@ namespace uk.andyjohnson.ElephantBackup
                 OnInformation?.Invoke(this, new BackupEventArgs("Starting at {0}", result.StartTime));
             }
 
-            // Get global filetype exclusions.
-            var globalExcludeFiletypes = config?.Options?.GlobalExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-
             try
             {
                 foreach (var source in config.BackupSource)
                 {
-                    var sourceExcludesFileTypes = source?.ExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                    var excludeFileTypes = Combine(globalExcludeFiletypes, sourceExcludesFileTypes);
+                    var excludeFileTypes = Combine(source.GetExcludeFileTypes(), config.Options.GetExcludeFileTypes());
+                    var excludeDirs = Combine(source.GetExcludeDirs(), config.Options.GetExcludeDirs());
 
                     // Create a top-level directory for each backup root in the configuration.
                     // We need to make sure these are unique.
                     var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
                                                      config.BackupTarget.Path);
-                    DoBackup(source.Path, targetPath, config.Options.Verify, excludeFileTypes, result);
+                    DoBackup(source.Path, targetPath, config.Options.Verify, excludeFileTypes, excludeDirs, result);
                 }
                 result.Success = true;
             }
@@ -104,12 +101,14 @@ namespace uk.andyjohnson.ElephantBackup
         /// <param name="targetDirPath">Target directory.</param>
         /// <param name="verify">Verify each file copy?</param>
         /// <param name="excludeFileTypes">File types to exclude</param>
+        /// <param name="excludeDirs">Directory names to exclude</param>
         /// <param name="progress">Backup result to be updated.</param>
         private void DoBackup(
             string sourceDirPath,
             string targetDirPath,
             bool verify,
             string[] excludeFileTypes,
+            string[] excludeDirs,
             BackupResult progress)
         {
             Directory.CreateDirectory(targetDirPath);
@@ -155,10 +154,10 @@ namespace uk.andyjohnson.ElephantBackup
             }
 
             // Recurse subdirectories.
-            foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath,new string[0]))
+            foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath, excludeDirs))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
-                DoBackup(sourceSubdirPath, targetSubdirPath, verify, excludeFileTypes, progress);
+                DoBackup(sourceSubdirPath, targetSubdirPath, verify, excludeFileTypes, excludeDirs, progress);
                 progress.DirectoriesCopied += 1;
             }
         }

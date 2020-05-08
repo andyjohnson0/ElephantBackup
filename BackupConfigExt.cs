@@ -175,4 +175,32 @@ namespace uk.andyjohnson.ElephantBackup
 
         #endregion Loading
     }
+
+
+    public partial class BackupSource
+    {
+        public string[] GetExcludeFileTypes()
+        {
+            return this.ExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public string[] GetExcludeDirs()
+        {
+            return this.ExcludeDirs?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+    }
+
+
+    public partial class Options
+    {
+        public string[] GetExcludeFileTypes()
+        {
+            return this.GlobalExcludeFileTypes?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public string[] GetExcludeDirs()
+        {
+            return this.GlobalExcludeDirs?.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+        }
+    }
 }
