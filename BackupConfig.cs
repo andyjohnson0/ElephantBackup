@@ -138,25 +138,55 @@ namespace uk.andyjohnson.ElephantBackup {
         
         private bool createLogFileField;
         
+        private bool createLogFileFieldSpecified;
+        
+        private bool verifyField;
+        
+        private bool verifyFieldSpecified;
+        
         private string globalExcludeFileTypesField;
         
         private string globalExcludeDirsField;
         
-        private bool verifyField;
-        
-        public Options() {
-            this.createLogFileField = true;
-            this.verifyField = false;
-        }
-        
         /// <remarks/>
-        [System.ComponentModel.DefaultValueAttribute(true)]
         public bool CreateLogFile {
             get {
                 return this.createLogFileField;
             }
             set {
                 this.createLogFileField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool CreateLogFileSpecified {
+            get {
+                return this.createLogFileFieldSpecified;
+            }
+            set {
+                this.createLogFileFieldSpecified = value;
+            }
+        }
+        
+        /// <remarks/>
+        public bool Verify {
+            get {
+                return this.verifyField;
+            }
+            set {
+                this.verifyField = value;
+            }
+        }
+        
+        /// <remarks/>
+        [System.Xml.Serialization.XmlIgnoreAttribute()]
+        public bool VerifySpecified {
+            get {
+                return this.verifyFieldSpecified;
+            }
+            set {
+                this.verifyFieldSpecified = value;
             }
         }
         
@@ -177,17 +207,6 @@ namespace uk.andyjohnson.ElephantBackup {
             }
             set {
                 this.globalExcludeDirsField = value;
-            }
-        }
-        
-        /// <remarks/>
-        [System.ComponentModel.DefaultValueAttribute(false)]
-        public bool Verify {
-            get {
-                return this.verifyField;
-            }
-            set {
-                this.verifyField = value;
             }
         }
     }

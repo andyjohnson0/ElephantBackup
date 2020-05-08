@@ -30,14 +30,19 @@ namespace uk.andyjohnson.ElephantBackup
                 {
                     new ElephantBackup.BackupSource()
                     {
-                        Path = string.Empty
+                        Path = string.Empty,
+                        ExcludeDirs = string.Empty,
+                        ExcludeFileTypes = string.Empty
                     }
                 },
                 Options = new Options()
                 {
                     GlobalExcludeFileTypes = string.Empty,
-                    Verify = false,
-                    CreateLogFile = true
+                    GlobalExcludeDirs = string.Empty,
+                    Verify = true,
+                    VerifySpecified = true,
+                    CreateLogFile = true,
+                    CreateLogFileSpecified = true
                 }
             };
             return doc;
@@ -47,9 +52,9 @@ namespace uk.andyjohnson.ElephantBackup
         public static BackupConfig CreateExample()
         {
             var doc = BackupConfig.Create();
-            doc.BackupTarget.Path = "Path to root of back-up. " +
-                                    "Omit or leave blank to back-up to the first removable device.";
-            doc.BackupSource[0].Path = "Folder to back-up. Add more as needed.";
+            doc.BackupSource[0].Path = Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+            doc.Options.GlobalExcludeFileTypes = ".obj;";
+            doc.Options.GlobalExcludeDirs = "AppData;obj;bin";
             return doc;
         }
 
