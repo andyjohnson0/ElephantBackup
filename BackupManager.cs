@@ -137,14 +137,23 @@ namespace uk.andyjohnson.ElephantBackup
                 {
                     CopyFile(sourceFilePath, targetFilePath, copyBuff, verify, out sourceHash, out targetHash);
                 }
-                catch(UnauthorizedAccessException ex)
+                catch(Exception ex)
                 {
-                    progress.FilesSkipped += 1;
-                    OnError?.Invoke(this, new BackupEventArgs("{0} File skipped.", ex.Message));
-                    continue;
+                    if (ex is UnauthorizedAccessException || ex is IOException)
+                    {
+                        progress.FilesSkipped += 1;
+                        OnError?.Invoke(this, new BackupEventArgs("{0} File skipped.", ex.Message));
+                        continue;
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
                 if (sourceHash != targetHash)
+                {
                     throw new IOException(string.Format("Backup verify failed for {0}", sourceFilePath));
+                }
                 progress.FilesCopied += 1;
                 progress.BytesCopied += sourceFileLen;
                 OnInformation?.Invoke(this,
@@ -154,7 +163,7 @@ namespace uk.andyjohnson.ElephantBackup
             }
 
             // Recurse subdirectories.
-            foreach(var sourceSubdirPath in EnumerateDirectories(sourceDirPath, excludeDirs))
+            foreach (var sourceSubdirPath in EnumerateDirectories(sourceDirPath, excludeDirs))
             {
                 var targetSubdirPath = Path.Combine(targetDirPath, sourceSubdirPath.Substring(sourceSubdirPath.LastIndexOf('\\') + 1));
                 DoBackup(sourceSubdirPath, targetSubdirPath, verify, excludeFileTypes, excludeDirs, progress);
