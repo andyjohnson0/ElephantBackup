@@ -6,7 +6,8 @@ for long-term storage of data.
 
 ## Getting Started
 
-1. Download the pre-built binary, or clone the repo and build it yourself.
+1. Download the pre-built binary from the [releases](https://github.com/andyjohnson0/ElephantBackup/releases)
+page, or clone the repo and build it yourself.
 
 2. Add eb.exe to your path
 
@@ -17,7 +18,7 @@ for long-term storage of data.
 
 ## Prerequisites
 
-.net framework 3.5
+.net framework 4.5 or later
 
 ## Author
 
@@ -25,4 +26,4 @@ Andy Johnson - http://andyjohnson.uk
 
 ## Licence
 
-This project is licensed under the terms of the MIT license.
+This project is licensed under the terms of the MIT license. See the licence file for more information.

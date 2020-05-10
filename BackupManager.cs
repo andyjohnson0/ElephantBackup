@@ -92,7 +92,7 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
-        private byte[] copyBuff = new byte[10240];
+        private byte[] copyBuff = new byte[10 * 1024 * 1024];
 
         /// <summary>
         /// backup a directory.
@@ -214,7 +214,7 @@ namespace uk.andyjohnson.ElephantBackup
                     }
                 }
             }
-            sourceHashStr = (sourceHash.Hash != null) ? HashToString(sourceHash.Hash) : null;
+            sourceHashStr = (sourceHash?.Hash != null) ? HashToString(sourceHash.Hash) : null;
 
             // if we're verifying the copy then re-hash the target file.
             if (verify)
