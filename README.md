@@ -4,6 +4,9 @@ Elephant Backup is a simple console-based backup application for Windows. You ca
 hierarchies to a target such as a removable device or local directory. Files are stored as exact copies, making it suitable
 for long-term storage of data.
 
+Use of this free software is at your own risk. You should accept responsibility for evaluating its reliability and
+suitability for your needs.
+
 ## Getting Started
 
 1. Download the pre-built binary from the [releases](https://github.com/andyjohnson0/ElephantBackup/releases)
