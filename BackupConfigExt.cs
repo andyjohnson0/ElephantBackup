@@ -105,7 +105,7 @@ namespace uk.andyjohnson.ElephantBackup
         private static string[] defaultConfigDirs = new string[]
         {
 #if DEBUG
-            "../../",
+            //"../../",
 #endif
             Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"),
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
@@ -154,28 +154,34 @@ namespace uk.andyjohnson.ElephantBackup
 
                 if (config.BackupTarget == null)
                     config.BackupTarget = new BackupTarget();
-                if (string.IsNullOrEmpty(config.BackupTarget.Path))
-                {
-                    config.BackupTarget.Path = BuildBackupTargetPath();
-                }
+                config.BackupTarget.Path = BuildBackupTargetPath(config.BackupTarget.Path);
 
                 return config;
             }
         }
 
 
-        private static string BuildBackupTargetPath()
+        private static string BuildBackupTargetPath(string path)
         {
-            foreach(var drive in DriveInfo.GetDrives())
+            if (string.IsNullOrEmpty(path))
             {
-                if (drive.IsReady && (drive.DriveType == DriveType.Removable))
+                foreach (var drive in DriveInfo.GetDrives())
                 {
-                    return string.Format("{0}{1}_{2}",
-                                         drive.Name, Environment.MachineName, DateTime.Now.ToString("yyyyMMddhhmmss"));
+                    if (drive.IsReady && (drive.DriveType == DriveType.Removable))
+                    {
+                        return string.Format("{0}{1}_{2}",
+                                             drive.Name, Environment.MachineName, DateTime.Now.ToString("yyyyMMddhhmmss"));
+                    }
                 }
+                return null;
             }
-
-            return null;
+            else
+            {
+                if (!path.EndsWith("\\"))
+                    path = path + "\\";
+                return Path.Combine(path, 
+                                    string.Format("{0}_{1}", Environment.MachineName, DateTime.Now.ToString("yyyyMMddhhmmss")));
+            }
         }
 
         #endregion Loading

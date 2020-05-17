@@ -42,10 +42,23 @@ namespace uk.andyjohnson.ElephantBackup
             var result = new BackupResult();
             result.StartTime = DateTime.Now;
 
+            try
+            {
+                Directory.CreateDirectory(config.BackupTarget.Path);
+            }
+            catch(Exception ex)
+            {
+                OnError?.Invoke(this,
+                                new BackupEventArgs("Failed to create backup directory at {0}", config.BackupTarget.Path));
+                result.Success = false;
+                result.Exception = ex;
+                result.EndTime = DateTime.Now;
+                return result;
+            }
+
             if ((config.Options != null) && config.Options.CreateLogFile)
             {
                 // Create log file.
-                Directory.CreateDirectory(config.BackupTarget.Path);
                 result.LogFilePath = Path.Combine(config.BackupTarget.Path, "backup.log");
                 logFileWtr = new StreamWriter(result.LogFilePath, false);
                 OnInformation?.Invoke(this, new BackupEventArgs("Starting at {0}", result.StartTime));

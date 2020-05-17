@@ -97,10 +97,10 @@ namespace uk.andyjohnson.ElephantBackup
 
             var result = bm.DoBackup();  // actually do the backup.
             if (result.Success)
-                Console.WriteLine("Backup succeeded after {0}", result.Timetaken);
+                Console.WriteLine("Backup succeeded after {0}", result.Timetaken.ToString(@"hh\:mm\:ss"));
             else
                 Console.WriteLine("Backup failed after {0} - {1}",
-                                    result.Timetaken,
+                                    result.Timetaken.ToString(@"hh\:mm\:ss"),
                                     (result.Exception != null) ? result.Exception.Message : "Unknown reason");
             Console.WriteLine("Started at {0}", result.StartTime.ToString());
             Console.WriteLine("Finished at {0}", result.EndTime.ToString());
