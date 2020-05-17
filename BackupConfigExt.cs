@@ -105,7 +105,7 @@ namespace uk.andyjohnson.ElephantBackup
         private static string[] defaultConfigDirs = new string[]
         {
 #if DEBUG
-            //"../../",
+            "../../",
 #endif
             Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"),
             Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
