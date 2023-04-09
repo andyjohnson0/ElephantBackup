@@ -21,12 +21,12 @@ page, or clone the repo and build it yourself.
 
 ## Prerequisites
 
-.net framework 4.5 or later
+.net 6 or later
 
 ## Author
 
-Andy Johnson - http://andyjohnson.uk
+Andrew Johnson | [github.com/andyjohnson0](https://github.com/andyjohnson0) | https://andyjohnson.uk
 
 ## Licence
 
-This project is licensed under the terms of the MIT license. See the licence file for more information.
+This project is licensed under the terms of the MIT license. See the [licence file](LICENSE.md) for more information.

@@ -6,8 +6,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
 
+using uk.andyjohnson.ElephantBackup.Lib;
 
-namespace uk.andyjohnson.ElephantBackup
+
+namespace uk.andyjohnson.ElephantBackup.Cli
 {
     /// <summary>
     /// Main driver class.
@@ -19,16 +21,15 @@ namespace uk.andyjohnson.ElephantBackup
         /// </summary>
         /// <param name="args">Command-line arguments</param>
         /// <returns>Completion staus. 0=ok, 1=error.</returns>
-        static int Main(string[] args)
+        public static int Main(string[] args)
         {
+#if DEBUG
+            // Set current dir to the project dir.
+            Directory.SetCurrentDirectory("./../../..");
+#endif
+
             return new Program().DoMain(args) ? 0 : 1;
         }
-
-
-
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern uint GetConsoleProcessList(uint[] ProcessList, uint ProcessCount);
 
 
         /// <summary>
@@ -41,7 +42,7 @@ namespace uk.andyjohnson.ElephantBackup
             var success = true;
             var cli = new CommandLineParser(args);
 
-            if (cli.GetArg(new string[] { "help", "?" } ))
+            if (cli.GetArg(new string[] { "help", "h", "?" } ))
             {
                 DoHelp();
             }
@@ -68,26 +69,42 @@ namespace uk.andyjohnson.ElephantBackup
         }
 
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern uint GetConsoleProcessList(uint[] ProcessList, uint ProcessCount);
+
+
         /// <summary>
         /// Perform a backup.
         /// </summary>
         /// <returns>true if the backup succeeded</returns>
         private bool DoBackup()
         {
-            var config = BackupConfig.Load();
+            var config = ConfigurationFactory.Load();
             if (config == null)
             {
                 Console.WriteLine("Error: Config file not found.");
                 return false;
             }
-            if ((config?.BackupTarget == null) || (config.BackupTarget.Path == null))
+            if ((config?.Target == null) || (config.Target.Path == null))
             {
-                Console.WriteLine("Error: No target specified");
+                Console.WriteLine("Error: No target specified and no default available");
                 return false;
             }
-            if ((config?.BackupSource == null) || (config.BackupSource.Length == 0))
+            if ((config?.Source == null) || (config.Source.Length == 0))
             {
                 Console.WriteLine("Error: No sources specified");
+                return false;
+            }
+
+            Console.WriteLine($"Backing-up {config.Source.Length} source(s) to {config.Target.Path}");
+            foreach(var source in config.Source)
+            {
+                Console.WriteLine($"    {source.Path}");
+            }
+            Console.WriteLine("Proceed? (Y/N)");
+            if (Console.ReadLine().Trim().ToUpper() != "Y")
+            {
+                Console.WriteLine("Aborted");
                 return false;
             }
 
@@ -104,7 +121,7 @@ namespace uk.andyjohnson.ElephantBackup
                                     (result.Exception != null) ? result.Exception.Message : "Unknown reason");
             Console.WriteLine("Started at {0}", result.StartTime.ToString());
             Console.WriteLine("Finished at {0}", result.EndTime.ToString());
-            Console.WriteLine("{0} bytes copied", result.BytesCopied);
+            Console.WriteLine("{0} bytes copied", result.BytesCopied.ToByteQuantity());
             Console.WriteLine("{0} files copied", result.FilesCopied);
             Console.WriteLine("{0} directories copied", result.DirectoriesCopied);
             Console.WriteLine("{0} files skipped", result.FilesSkipped);
@@ -136,7 +153,7 @@ namespace uk.andyjohnson.ElephantBackup
 
 
 
-        private void DoHelp()
+        private static void DoHelp()
         {
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
@@ -145,9 +162,9 @@ namespace uk.andyjohnson.ElephantBackup
             Console.WriteLine("Elephant Backup v{0} by Andy Johnson - https://andyjohnson.uk", version);
             Console.WriteLine();
             Console.WriteLine("Usage:");
-            Console.WriteLine("  eb [/? | /help]");
+            Console.WriteLine("  eb [/? | /h | /help]");
             Console.WriteLine("    - Display this usage information");
-            Console.WriteLine("  eb /createconfig");
+            Console.WriteLine("  eb [/createconfig | /cc]");
             Console.WriteLine("    - Create a blank config file in the user's home directory");
             Console.WriteLine("  eb");
             Console.WriteLine("    - Perform a backup");
@@ -160,22 +177,22 @@ namespace uk.andyjohnson.ElephantBackup
         /// <summary>
         /// Create a blank configuration file.
         /// </summary>
-        private void DoCreateConfig()
+        private static void DoCreateConfig()
         {
-            string configPath = BackupConfig.GetConfigPath();
+            string configPath = ConfigurationFactory.GetConfigPath();
             if (File.Exists(configPath))
             {
-                Console.WriteLine("{0} already exists. Overwrite (y/n)?", configPath);
-                if (Console.ReadLine() != "y")
+                Console.WriteLine($"{configPath} already exists. Overwrite (y/n)?");
+                if (Console.ReadLine().ToUpper() != "Y")
                     return;
             }
 
             using(var wtr = new StreamWriter(configPath, false, Encoding.UTF8))
             {
-                var configStr = BackupConfig.CreateExample().ToString();
+                var configStr = ConfigurationFactory.CreateExample().ToString();
                 wtr.Write(configStr);
             }
-            Console.WriteLine("Config file written to {0}", configPath);
+            Console.WriteLine($"Config file written to {configPath}");
         }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 
-namespace uk.andyjohnson.ElephantBackup
+namespace uk.andyjohnson.ElephantBackup.Cli
 {
     /// <summary>
     /// a simplem command-line parser.

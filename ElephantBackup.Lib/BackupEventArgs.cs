@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace uk.andyjohnson.ElephantBackup
+namespace uk.andyjohnson.ElephantBackup.Lib
 {
     public class BackupEventArgs : EventArgs
     {

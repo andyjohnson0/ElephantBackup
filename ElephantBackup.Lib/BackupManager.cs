@@ -6,7 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 
 
-namespace uk.andyjohnson.ElephantBackup
+namespace uk.andyjohnson.ElephantBackup.Lib
 {
     /// <summary>
     /// Manages the backup process.
@@ -18,12 +18,12 @@ namespace uk.andyjohnson.ElephantBackup
         /// </summary>
         /// <param name="config">Configuation.</param>
         public BackupManager(
-            BackupConfig config)
+            Configuration config)
         {
             this.config = config;
         }
 
-        private BackupConfig config;
+        private Configuration config;
         private StreamWriter logFileWtr;
 
         public EventHandler<BackupEventArgs> OnError;
@@ -44,12 +44,12 @@ namespace uk.andyjohnson.ElephantBackup
 
             try
             {
-                Directory.CreateDirectory(config.BackupTarget.Path);
+                Directory.CreateDirectory(config.Target.Path);
             }
             catch(Exception ex)
             {
                 OnError?.Invoke(this,
-                                new BackupEventArgs("Failed to create backup directory at {0}", config.BackupTarget.Path));
+                                new BackupEventArgs($"Failed to create target directory at {config.Target.Path}"));
                 result.Success = false;
                 result.Exception = ex;
                 result.EndTime = DateTime.Now;
@@ -59,22 +59,23 @@ namespace uk.andyjohnson.ElephantBackup
             if ((config.Options != null) && config.Options.CreateLogFile)
             {
                 // Create log file.
-                result.LogFilePath = Path.Combine(config.BackupTarget.Path, "backup.log");
+                result.LogFilePath = Path.Combine(config.Target.Path, "backup.log");
                 logFileWtr = new StreamWriter(result.LogFilePath, false);
-                OnInformation?.Invoke(this, new BackupEventArgs("Starting at {0}", result.StartTime));
+                OnInformation?.Invoke(this, new BackupEventArgs($"Starting at {result.StartTime}"));
             }
+
+            var rootPath = Path.Combine(config.Target.Path, DateTime.Now.ToString("yyyyMMdd_hhmmss"));
 
             try
             {
-                foreach (var source in config.BackupSource)
+                foreach (var source in config.Source)
                 {
                     var excludeFileTypes = Combine(source.GetExcludeFileTypes(), config.Options.GetExcludeFileTypes());
                     var excludeDirs = Combine(source.GetExcludeDirs(), config.Options.GetExcludeDirs());
 
                     // Create a top-level directory for each backup root in the configuration.
                     // We need to make sure these are unique.
-                    var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name,
-                                                     config.BackupTarget.Path);
+                    var targetPath = BuildTargetPath(new DirectoryInfo(source.Path).Name, rootPath);
                     DoBackup(source.Path, targetPath, config.Options.Verify, excludeFileTypes, excludeDirs, result);
                 }
                 result.Success = true;
@@ -85,15 +86,16 @@ namespace uk.andyjohnson.ElephantBackup
                 result.Exception = ex;
                 if (logFileWtr != null)
                 {
-                    logFileWtr.WriteLine("{0} : Error: {1}", DateTime.Now, ex.Message);
+                    logFileWtr.WriteLine($"{DateTime.Now} : Error: {ex.Message}");
                 }
             }
             finally
             {
                 result.EndTime = DateTime.Now;
+                result.RootDirectory = new DirectoryInfo(rootPath);
                 if (logFileWtr != null)
                 {
-                    logFileWtr.WriteLine("Finished at {0}", result.EndTime);
+                    logFileWtr.WriteLine($"Finished at {result.EndTime}");
                     logFileWtr.Close();
                     logFileWtr = null;
                 }
@@ -135,7 +137,7 @@ namespace uk.andyjohnson.ElephantBackup
             catch(System.UnauthorizedAccessException ex)
             {
                 progress.DirectoriesSkipped += 1;
-                OnError?.Invoke(this, new BackupEventArgs("{0} Directory skipped.", ex.Message));
+                OnError?.Invoke(this, new BackupEventArgs($"{ex.Message}: Directory skipped."));
 
                 return;
             }
@@ -144,7 +146,7 @@ namespace uk.andyjohnson.ElephantBackup
             {
                 var targetFilePath = Path.Combine(targetDirPath, sourceFilePath.Substring(sourceFilePath.LastIndexOf('\\') + 1));
                 var sourceFileLen = new FileInfo(sourceFilePath).Length;
-                OnInformation?.Invoke(this, new BackupEventArgs("{0} => {1}", sourceFilePath, targetFilePath));
+                OnInformation?.Invoke(this, new BackupEventArgs($"{sourceFilePath} => {targetFilePath}"));
                 string sourceHash, targetHash;
                 try
                 {
@@ -155,7 +157,7 @@ namespace uk.andyjohnson.ElephantBackup
                     if (ex is UnauthorizedAccessException || ex is IOException)
                     {
                         progress.FilesSkipped += 1;
-                        OnError?.Invoke(this, new BackupEventArgs("{0} File skipped.", ex.Message));
+                        OnError?.Invoke(this, new BackupEventArgs($"{ex.Message}: File skipped"));
                         continue;
                     }
                     else
@@ -165,7 +167,7 @@ namespace uk.andyjohnson.ElephantBackup
                 }
                 if (sourceHash != targetHash)
                 {
-                    throw new IOException(string.Format("Backup verify failed for {0}", sourceFilePath));
+                    throw new IOException(string.Format($"Backup verify failed for {sourceFilePath}"));
                 }
                 progress.FilesCopied += 1;
                 progress.BytesCopied += sourceFileLen;
@@ -304,8 +306,8 @@ namespace uk.andyjohnson.ElephantBackup
         /// <summary>
         /// Create a unique name for a directory within a parent.
         /// </summary>
-        /// <param name="sourceDirName">directory name.</param>
-        /// <param name="targetParentDirPath">Base name.</param>
+        /// <param name="sourceDirName">Directory name.</param>
+        /// <param name="targetParentDirPath">Base path.</param>
         /// <returns>Unique name.</returns>
         private static string BuildTargetPath(
             string sourceDirName, 
@@ -313,14 +315,12 @@ namespace uk.andyjohnson.ElephantBackup
         {
             for(var i = 0; i < 100000; i++)
             {
-                var path = Path.Combine(targetParentDirPath, "backup");
-                path = Path.Combine(path, sourceDirName);
-                path = Path.Combine(path, (i == 0) ? string.Empty : i.ToString());
+                var path = Path.Combine(targetParentDirPath, sourceDirName, (i == 0) ? string.Empty : i.ToString());
                 if (!Directory.Exists(path))
                     return path;
             }
 
-            throw new Exception("Too many source root directories with same name: " + sourceDirName);
+            throw new InvalidOperationException($"Too many source root directories with same name: {sourceDirName}");
         }
 
 
@@ -355,7 +355,7 @@ namespace uk.andyjohnson.ElephantBackup
         {
             if (logFileWtr != null)
             {
-                logFileWtr.WriteLine("Error: " + args.Message);
+                logFileWtr.WriteLine($"Error: {args.Message}");
             }
         }
 

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ElephantBackup.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "/createconfig"
+    }
+  }
+}

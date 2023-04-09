@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace uk.andyjohnson.ElephantBackup
+namespace uk.andyjohnson.ElephantBackup.Lib
 {
     /// <summary>
     /// Represents the result of a backup operation.
@@ -24,6 +24,11 @@ namespace uk.andyjohnson.ElephantBackup
         /// End time of backup.
         /// </summary>
         public DateTime EndTime { get; set; }
+
+        /// <summary>
+        /// Root directory for the backup. This will be a subdirectory of the target directory.
+        /// </summary>
+        public DirectoryInfo RootDirectory { get; set; }
 
         /// <summary>
         /// Time taken for backup.

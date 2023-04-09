@@ -1,15 +1,20 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElephantBackup", "ElephantBackup.csproj", "{50926FB9-7DFE-42BF-A7A1-48447F019EBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElephantBackup.Cli", "ElephantBackup.Cli\ElephantBackup.Cli.csproj", "{50926FB9-7DFE-42BF-A7A1-48447F019EBC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7D7180F0-3839-493F-BE14-2D57BC93AD38}"
 	ProjectSection(SolutionItems) = preProject
-		LICENSE = LICENSE
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE.md = LICENSE.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElephantBackup.Lib", "ElephantBackup.Lib\ElephantBackup.Lib.csproj", "{9B8016CC-BB44-41D0-BB3F-16F847555848}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ElephantBackup.Lib.Tests", "ElephantBackup.Lib.Tests\ElephantBackup.Lib.Tests.csproj", "{0A435A42-A5E1-4944-8B60-6E5F478460B9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +26,14 @@ Global
 		{50926FB9-7DFE-42BF-A7A1-48447F019EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50926FB9-7DFE-42BF-A7A1-48447F019EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50926FB9-7DFE-42BF-A7A1-48447F019EBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B8016CC-BB44-41D0-BB3F-16F847555848}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B8016CC-BB44-41D0-BB3F-16F847555848}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B8016CC-BB44-41D0-BB3F-16F847555848}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B8016CC-BB44-41D0-BB3F-16F847555848}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A435A42-A5E1-4944-8B60-6E5F478460B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A435A42-A5E1-4944-8B60-6E5F478460B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A435A42-A5E1-4944-8B60-6E5F478460B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A435A42-A5E1-4944-8B60-6E5F478460B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

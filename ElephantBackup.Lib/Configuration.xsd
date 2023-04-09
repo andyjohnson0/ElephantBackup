@@ -1,20 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="BackupConfig"
     elementFormDefault="qualified"
-    xmlns:xs="http://www.w3.org/2001/XMLSchema"
->
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <xs:element name="BackupConfig">
+  <xs:element name="Configuration">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="BackupTarget" minOccurs="0"/>
-        <xs:element ref="BackupSource" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element ref="Target" minOccurs="0"/>
+        <xs:element ref="Source" minOccurs="0" maxOccurs="unbounded"/>
         <xs:element ref="Options" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>   
   </xs:element>
 
-  <xs:element name="BackupTarget">
+  <xs:element name="Target">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Path" type="xs:string" minOccurs="0"/>
@@ -22,7 +21,7 @@
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="BackupSource">
+  <xs:element name="Source">
     <xs:complexType>
       <xs:sequence>
         <xs:element name="Path" type="xs:string"/>
